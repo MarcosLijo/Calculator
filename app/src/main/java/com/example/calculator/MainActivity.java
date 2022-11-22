@@ -8,124 +8,157 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
+    String operacion = "";
     String operador = "";
-    String aux = "";
-    String resultadoTotal = "";
-    String res = "";
-    int r = 0;
     int op1;
     int op2;
-    boolean b = false;
+    int resultado;
+    String text2 = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         Button bEq = findViewById(R.id.buttonEqual);
-        bEq.setClickable(false);
+        bEq.setEnabled(false);
 
     }
 
     public void escribirOperando(View view) {
         TextView tv = findViewById(R.id.TextViewOperation);
+        TextView tv2 = findViewById(R.id.TextViewResult);
         Button bEq = findViewById(R.id.buttonEqual);
-        if (b/*Si viene de un resultado*/) return;
-//        if (r != 0) aux = r + aux;
-        aux += (String) view.getTag();
-        resultadoTotal += (String) view.getTag();
-        tv.setText(resultadoTotal);
-        bEq.setClickable(true);
+        Button b0 = findViewById(R.id.button0);
 
-        // PRUEBA
-//        res += (String) view.getTag();
+        if (resultado != 0) operacion = "";
+        operacion += (String) view.getTag();
+        tv.setText(operacion);
+
+        if (!operador.equals("")) {
+            calcular(tv2);
+        } else {
+            text2 += (String) view.getTag();
+            tv2.setText(text2);
+        }
+
+
+        bEq.setEnabled(true);
+        b0.setEnabled(true);
     }
+
+    private void calcular(TextView tv2) {
+
+        String[] values = operacion.split("[-+*/%]+");
+
+        op1 = Integer.parseInt(values[0]);
+        op2 = Integer.parseInt(values[1]);
+
+        switch (operador) {
+            case "+":
+                text2 = String.valueOf(op1 + op2);
+                break;
+            case "-":
+                text2 = String.valueOf(op1 - op2);
+                break;
+            case "*":
+                text2 = String.valueOf(op1 * op2);
+                break;
+            case "/":
+                text2 = String.valueOf(op1 / op2);
+                break;
+            case "%":
+                text2 = String.valueOf(op1 % op2);
+                break;
+            default:
+                break;
+        }
+        tv2.setText(text2);
+    }
+
 
     public void escribirOperador(View view) {
         TextView tv = findViewById(R.id.TextViewOperation);
         Button b0 = findViewById(R.id.button0);
         Button bEq = findViewById(R.id.buttonEqual);
+        // No se puede pulsar un operador si no hay un operando primero
+        if (operacion.equals("")) return;
+        if (operacion.startsWith("-")) return;
 
-        if (resultadoTotal.equals("")) return;
-
-        b = false;
+        resultado = 0;
 
         if (operador.equals("")) {
-            if (aux.equals("")) {
-                op1 = r;
-            } else {
-                op1 = Integer.parseInt(aux);
-            }
-            aux = "";
             operador = (String) view.getTag();
-            resultadoTotal += operador;
-            tv.setText(resultadoTotal);
+            operacion += operador;
+            tv.setText(operacion);
         }
 
-//        res += (String) view.getTag();
-
-        if (operador.equals("/")) b0.setClickable(false);
-        if (operador.equals("R")) b0.setClickable(false);
-
-        if (resultadoTotal.endsWith("+") || resultadoTotal.endsWith("-") || resultadoTotal.endsWith("*") || resultadoTotal.endsWith("/") || resultadoTotal.endsWith("R"))
-            bEq.setClickable(false);
+        // No se puede dividir entre 0
+        if (operador.equals("/") || operador.equals("%")) b0.setEnabled(false);
+        // No pulsar igual si no se ha completado la operación
+        if (operacion.endsWith("+") || operacion.endsWith("-") || operacion.endsWith("*") || operacion.endsWith("/") || operacion.endsWith("%"))
+            bEq.setEnabled(false);
 
     }
 
-    public void resultado(View view) {
+    public void escribirResultado(View view) {
         TextView tv = findViewById(R.id.TextViewOperation);
         Button b0 = findViewById(R.id.button0);
         Button bEq = findViewById(R.id.buttonEqual);
 
-//        String[] values = res.split("^[-+*/R]");
+        try {
+            String[] values = operacion.split("[-+*/%]+");
 
-//        op1 = Integer.parseInt(values[0]);
-//        op2 = Integer.parseInt(values[1]);
+            op1 = Integer.parseInt(values[0]);
+            op2 = Integer.parseInt(values[1]);
+        } catch (Exception e) {
+            return;
+        }
 
-
-        op2 = Integer.parseInt(aux);
 
         switch (operador) {
             case "+":
-                r = op1 + op2;
+                resultado = op1 + op2;
                 break;
             case "-":
-                r = op1 - op2;
+                resultado = op1 - op2;
                 break;
             case "*":
-                r = op1 * op2;
+                resultado = op1 * op2;
                 break;
             case "/":
-                r = op1 / op2;
+                resultado = op1 / op2;
                 break;
-            case "R":
-                r = op1 % op2;
+            case "%":
+                resultado = op1 % op2;
                 break;
             default:
-                r = Integer.parseInt(aux);
+//                resultado = Integer.parseInt(aux);
                 break;
         }
-        resultadoTotal += " = " + r;
-        tv.setText(resultadoTotal);
-        if (operador.equals("/")) b0.setClickable(true);
-        if (operador.equals("R")) b0.setClickable(true);
+        operacion += "=" + resultado;
+
+        tv.setText(operacion);
+        operacion = String.valueOf(resultado);
+
+
+        if (operador.equals("/") || operador.equals("%")) b0.setEnabled(true);
         op1 = 0;
         op2 = 0;
         operador = "";
-        aux = "";
-        b = true;
-        bEq.setClickable(false);
+        bEq.setEnabled(false);
     }
 
     public void clearAll(View view) {
         TextView tv = findViewById(R.id.TextViewOperation);
+        TextView tv2 = findViewById(R.id.TextViewResult);
+        operacion = "";
         operador = "";
-        aux = "";
-        resultadoTotal = "";
         op1 = 0;
         op2 = 0;
-        r = 0;
+        resultado = 0;
+        text2 = "";
         tv.setText("0");
+        tv2.setText("0");
     }
 }
